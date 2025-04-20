@@ -1,28 +1,20 @@
 #![no_std] // Remove std
 #![no_main] // Remove main
 
-use core::panic::PanicInfo;
-
-static HELLO: &[u8] = b"Hello, World!";
+mod vga_buffer;
 
 // Overwrite the default entry point function
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
+    println!("Hello, World{}", "!");
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        let i: isize = i as isize * 2;
-        unsafe {
-            *vga_buffer.offset(i) = byte;
-            *vga_buffer.offset(i + 1) = 0xb;
-        }
-    }
-
-    panic!()
+    panic!("Custom panic message")
 }
 
 // Define a custom panic handler that does not return
+use core::panic::PanicInfo;
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    eprint!("\n{info}");
     loop {}
 }
