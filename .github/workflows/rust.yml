@@ -19,6 +19,6 @@ jobs:
     - name: Build
       run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu && cargo build --verbose
     - name: Create bootimage
-      run: cargo bootimage
+      run: cargo install bootimage && cargo bootimage
     # - name: Run tests
     #   run: cargo test --verbose
