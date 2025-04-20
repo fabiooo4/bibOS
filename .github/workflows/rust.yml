@@ -2,23 +2,24 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu && cargo build --verbose
-    - name: Create bootimage
-      run: cargo install bootimage && cargo bootimage
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: rustup component add rust-src llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu && cargo install bootimage 
+      - name: Build
+        run: cargo build --verbose
+      - name: Create bootimage
+        run: cargo bootimage
     # - name: Run tests
     #   run: cargo test --verbose
