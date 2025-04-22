@@ -6,17 +6,22 @@
 #![test_runner(crate::test_runner)]
 // Change test function name to allow calling from _start
 #![reexport_test_harness_main = "test_main"]
+#![feature(abi_x86_interrupt)]
+pub mod interrupts;
 
+pub mod gdt;
 pub mod serial;
 pub mod vga_buffer;
+
 use core::{fmt, panic::PanicInfo};
 
 // Lib test setup
 #[cfg(test)]
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]
@@ -61,7 +66,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("{}\n", Red("[failed]"));
     serial_println!("{} {}\n", Red("Error:"), info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    hlt_loop()
 }
 
 // Custom test runner
@@ -94,5 +99,21 @@ impl fmt::Display for Red {
         write!(f, "{}", self.0)?;
         write!(f, "\x1B[0m")?; // postfix code
         Ok(())
+    }
+}
+
+// Initialization
+pub fn init() {
+    interrupts::init_idt();
+    gdt::init();
+    unsafe {
+        interrupts::PICS.lock().initialize();
+    }
+    x86_64::instructions::interrupts::enable();
+}
+
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
     }
 }

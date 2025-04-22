@@ -7,7 +7,7 @@
 // Change test function name to allow calling from _start
 #![reexport_test_harness_main = "test_main"]
 
-use bib_os::{eprintln, println};
+use bib_os::{eprintln, hlt_loop, println};
 use core::panic::PanicInfo;
 
 #[allow(clippy::empty_loop)]
@@ -15,7 +15,7 @@ use core::panic::PanicInfo;
 pub extern "C" fn _start() -> ! {
     test_main();
 
-    loop {}
+    hlt_loop()
 }
 
 #[panic_handler]

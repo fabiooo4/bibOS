@@ -77,6 +77,24 @@ lazy_static! {
 }
 
 impl Writer {
+    pub fn write_byte_at(&mut self, byte: u8, row: usize, col: usize) -> Result<(), &'static str> {
+        if row >= BUFFER_HEIGHT || col >= BUFFER_WIDTH {
+            return Err("Indexes out of bounds");
+        }
+
+        match byte {
+            b'\n' => self.new_line(),
+            byte => {
+                self.buffer.chars[row][col].write(ScreenChar {
+                    char: byte,
+                    attribute: self.color,
+                });
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -130,6 +148,20 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
+
+    pub fn get_row_bytes(&self, row: usize) -> Result<[u8; BUFFER_WIDTH], &'static str> {
+        if !(0..BUFFER_HEIGHT).contains(&row) {
+            return Err("Row out of bounds");
+        }
+
+        let mut str: [u8; BUFFER_WIDTH] = [0; BUFFER_WIDTH];
+
+        (0..BUFFER_WIDTH).for_each(|i| {
+            str[i] = self.buffer.chars[row][i].read().char;
+        });
+
+        Ok(str)
+    }
 }
 
 impl Write for Writer {
@@ -142,7 +174,11 @@ impl Write for Writer {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    STDOUT.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        STDOUT.lock().write_fmt(args).unwrap();
+    });
 }
 
 #[macro_export]
@@ -187,10 +223,16 @@ fn test_println_many() {
 
 #[test_case]
 fn test_println_output() {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
+
     let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = STDOUT.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.char), c);
-    }
+    interrupts::without_interrupts(|| {
+        let mut writer = STDOUT.lock();
+        writeln!(writer, "\n{}", s).expect("writeln failed");
+        for (i, c) in s.chars().enumerate() {
+            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.char), c);
+        }
+    });
 }

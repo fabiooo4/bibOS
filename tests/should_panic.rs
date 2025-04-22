@@ -5,7 +5,7 @@
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use bib_os::{Green, QemuExitCode, Red, exit_qemu, serial_print, serial_println};
+use bib_os::{exit_qemu, hlt_loop, serial_print, serial_println, Green, QemuExitCode, Red};
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)]
@@ -14,14 +14,14 @@ pub extern "C" fn _start() -> ! {
     serial_println!("{}", Red("[test did not panic]"));
     exit_qemu(QemuExitCode::Failed);
 
-    loop {}
+    hlt_loop()
 }
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     serial_println!("{}", Green("[ok]"));
     exit_qemu(QemuExitCode::Success);
-    loop {}
+    hlt_loop()
 }
 
 fn should_fail() {
