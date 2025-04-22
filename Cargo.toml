@@ -1,13 +1,28 @@
 [package]
-name = "bibOS"
+name = "bib_os"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bootloader = "0.9"
-volatile = "0.2.6"
-spin = "0.5.2"
+bootloader = "0.9" # Creates a bootable image of the kernel
+volatile = "0.2.6" # Volatile memory reads/writess
+spin = "0.5.2" # Busy waiting mutex
+x86_64 = "0.14.2" # x86_64 ports
+uart_16550 = "0.2.0" # Serial ports
 
-[dependencies.lazy_static]
+[dependencies.lazy_static] # Initialize static structs
 version = "1.0"
 features = ["spin_no_std"]
+
+[package.metadata.bootimage]
+# Creates a exit device on port 0xf4 of 4 bytes and a serial connection to the host machine
+test-args = [
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
+    "-display", "none"
+]
+test-timeout = 300          # (in seconds)
+test-success-exit-code = 33 # (0x10 << 1) | 1
+
+[[test]]
+name = "should_panic"
+harness = false
