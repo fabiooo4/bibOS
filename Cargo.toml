@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bootloader = "0.9" # Creates a bootable image of the kernel
+# Creates a bootable image of the kernel
+bootloader = { version = "0.9", features = ["map_physical_memory"]}
 volatile = "0.2.6" # Volatile memory reads/writess
 spin = "0.5.2" # Busy waiting mutex
 x86_64 = "0.14.2" # x86_64 ports
