@@ -13,6 +13,8 @@ pub mod gdt;
 pub mod serial;
 pub mod vga_buffer;
 pub mod memory;
+extern crate alloc;
+pub mod allocator;
 
 use core::{fmt, panic::PanicInfo};
 
