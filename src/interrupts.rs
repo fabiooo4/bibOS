@@ -1,5 +1,5 @@
 use crate::{eprintln, hlt_loop};
-use crate::{gdt, print, println, vga_buffer::STDOUT};
+use crate::{gdt, print};
 use lazy_static::lazy_static;
 use pc_keyboard::{DecodedKey, HandleControl, Keyboard, ScancodeSet1, layouts};
 use pic8259::ChainedPics;

@@ -1,7 +1,8 @@
-mod bump;
-mod linked_list;
+pub mod bump;
+pub mod fixed_size_block;
+pub mod linked_list;
 
-use crate::allocator::linked_list::LinkedListAllocator;
+use fixed_size_block::FixedSizeBlockAllocator;
 use spin::Mutex;
 use x86_64::{
     VirtAddr,
@@ -11,7 +12,7 @@ use x86_64::{
 };
 
 #[global_allocator]
-static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
 
 // Heap memory region
 pub const HEAP_START: usize = 0x_4444_4444_0000;
