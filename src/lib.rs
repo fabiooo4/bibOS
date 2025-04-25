@@ -15,6 +15,7 @@ pub mod vga_buffer;
 pub mod memory;
 extern crate alloc;
 pub mod allocator;
+pub mod task;
 
 use core::{fmt, panic::PanicInfo};
 
